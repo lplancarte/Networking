@@ -43,6 +43,7 @@ public class Client extends JFrame{
 	private JPanel textPanel;
 	private JButton submitBtn;
 	private JButton addBtn;
+	private JButton resetBtn;
 
 	private JTextArea displayArea1; //matrix 1
 	private JTextArea displayArea2; //matrix 2
@@ -85,29 +86,29 @@ public class Client extends JFrame{
 			new ActionListener(){
 				public void actionPerformed(ActionEvent e){
 					//display the input in terminal & GUI
-					System.out.println("Submit Button Pressed");
-					String input = userInputField.getText();
-					System.out.println(input);
-					output.append("Opening: "+ input);
-					output.append("\nFile Processed\n");
-					//submitBtn.setVisible(false);
-					//addBtn.setVisible(true);
+					processUserInput();
 
 				}
 			}
 		);
+
+		resetBtn = new JButton("Reset");
+		resetBtn.addActionListener(
+			new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					//reset the userinputfield.
+					resetUserInput();
+				}
+			}
+		);
+
 		userInputField = new JTextField(" .txt",25);
 		userInputField.addKeyListener(new KeyListener(){
 				public void keyTyped(KeyEvent e){}
 				public void keyReleased(KeyEvent e){}
 				public void keyPressed(KeyEvent e){
 					if(e.getKeyCode() == KeyEvent.VK_ENTER){
-						//TODO: put into method
-						System.out.println("Submit Button Pressed");
-						String input = userInputField.getText();
-						System.out.println(input);
-						output.append("Opening: "+ input);
-						output.append("\nFile Processed\n");
+						processUserInput();
 					}
 				}
 			}
@@ -128,7 +129,7 @@ public class Client extends JFrame{
 								JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		JScrollBar vSBar = outputPanel.getVerticalScrollBar();
 
-		outputPanel.setBorder(BorderFactory.createTitledBorder("Terminal"+ 
+		outputPanel.setBorder(BorderFactory.createTitledBorder("Terminal"+
 														"Output"));
 
 		fileInputLabel = new JLabel("Enter File Name: ");
@@ -179,6 +180,7 @@ public class Client extends JFrame{
 		textPanel.add(submitBtn);
 		addBtn.setVisible(false); //when file is good then visible
 		textPanel.add(addBtn);
+		textPanel.add(resetBtn);
 		textPanel.add(fileNotFoundLbl,BorderLayout.PAGE_END);
 		fileNotFoundLbl.setVisible(false); //if file not found visible
 
@@ -204,6 +206,34 @@ public class Client extends JFrame{
 
 	}
 
+
+	/**
+	*processUserInput() processess user input to some degree
+	for now it will print to terminal and gui, switch buttons around.
+	Used in ActionEventListener and KeyEventListener for submitBtn and
+	userInputField respectivley.
+	*/
+	private void processUserInput(){
+		System.out.println("Submit Button Pressed");
+		String input = userInputField.getText();
+		System.out.println(input);
+		output.append("Opening: "+ input);
+		//TODO: Validate user input
+		output.append("\nFile Processed\n");
+		submitBtn.setVisible(false);
+		addBtn.setVisible(true);
+		userInputField.setEditable(false);
+
+	}//end processUserInput()
+
+
+	private void resetUserInput(){
+		System.out.println("Reset Button Pressed");
+		userInputField.setText(".txt");
+		submitBtn.setVisible(true);
+		addBtn.setVisible(false);
+		userInputField.setEditable(true);
+	}
 
 
 
