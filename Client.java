@@ -44,6 +44,11 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.UIManager; //Used for Informational Icon 
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+
+
 /**
 
 */
@@ -51,6 +56,14 @@ public class Client extends JFrame{
 
 	private static final int HEIGHT = 800;
 	private static final int WIDTH = 600;
+	
+	//FILE IO -> Brought in from Previous Lab 
+	private static int [][] blue = null;
+	private static int [][] red = null;
+	private static int [][] purple = null;
+	private static int ROW = 0;
+	private static int COL = 0;
+	private static String inputFileDefault = "matrix1.txt";
 
 	//---------GUI Components---------------------
 	private JPanel backgroundPanel;
@@ -79,29 +92,159 @@ public class Client extends JFrame{
 	private JMenu menu;
 	private JMenuItem m1;
 //---------------------------------------------
-	private File file;
-	private Scanner inputScanner;
 
 
-	private String dummyData ="_,_,_,_,_,_,_\n"+
-								"_,_,_,_,_,_,_\n"+
-								"_,_,_,_,_,_,_\n"+
-								"_,_,_,_,_,_,_\n"+
-								"_,_,_,_,_,_,_\n"+
-								"_,_,_,_,_,_,_\n"+
-								"_,_,_,_,_,_,_";
-	//private String dummyData = "";
+
+	private String dummyData = "";
 
 
 	public Client(){
 		//GUI
 		super("Client: Matrix Addition");	
 		buildGUI();
+				
+
 
 
 
 	}
+	
+	///--------------START FILE IO METHODS-------->FROM PREVIOUS LAB----------
+	public  void print2dArray(int[][] matrix){
+		//print array given
+		for(int i = 0; i < matrix.length; i++){
+			for(int j = 0; j < matrix[i].length; j++){
+				System.out.printf("%4d",matrix[i][j]);
+			}
+			System.out.println();
+		}
+	}//end print2dArray
 
+
+	public  void print2dArrayToTextArea(int[][] matrix, JTextArea textArea){
+		//print array given
+		for(int i = 0; i < matrix.length; i++){
+			for(int j = 0; j < matrix[i].length; j++){
+				textArea.append(String.format("%2d",matrix[i][j]));
+			}
+			if(i < matrix.length -1)
+				textArea.append("\n");
+		}
+	}//end print2dArray
+
+	/**		checkFile(String[] args)
+	LLP: not checking arguments from terminal; modify to take in userinputField text
+		TODO: change description @params 
+	*Checks that the file to analyze exists. Default: 'matrix1.txt'
+	*Has the capability of accepting user input for different txt files
+	*if argument is detected in the terminal.
+	*These custom txt files must have the same format as 'matrix1.txt'.
+	*Header line with 2 numbers for row and columns
+	*Number of lines = 2x rows with as many integers as columns
+	@param args - Array of strings from the terminal used to search for file
+				  can be empty
+	@return inputFile - input file to be processed. Returns null for error.
+	*/
+	 private File checkFile(String fileName){
+		File inputFile = null;
+		Path inputFilePath =  null;
+		try{
+			if(fileName.length() > 0){
+				inputFilePath = Paths.get(fileName);
+				inputFile = new File(inputFilePath.toString());
+				System.out.println("Checking "+inputFilePath.toString());
+			}else{
+				inputFile = new File(inputFileDefault); //default file
+				System.out.println("No Arguments detected."+
+ 				"Analyzing default file: " + inputFile.getName());
+			}
+			//Check if the file exists
+			if(!inputFile.canRead()){
+				//display to outputTerminal
+				writeToOuputTerminal("\n404: File not found."+		
+				"The file you are looking for, isn't here.");
+				fileNotFoundLbl.setVisible(true);
+				
+				throw new FileNotFoundException("404: File not found."+
+				"The file you are looking for, isn't here.\n");
+			}
+		}catch(Exception e){
+			System.out.print("Something went wrong. Error "+
+			e.getMessage()+"\nExiting.\n");
+			return null;
+		}
+		return inputFile;
+	}//end checkFile()
+
+		
+	/** 	processFile(File inputFile)
+	@param inputFile -File to be processed; returned by checkFile()
+	*It is assumed that this file has both:
+	*A header line with two integers representing rows and columns
+	*Dual matrices one on top of the other (2xrow)xcol
+	*/
+	 private void processFile(File inputFile){
+
+		try{
+			Scanner reader = new Scanner(inputFile);
+
+			//Feedback implementation
+			ROW = reader.nextInt();
+			COL = reader.nextInt();
+
+			//Create Arrays red, blue, and purple,fill with 0's
+			createArrays(ROW,COL);
+			//Fill arrays blue and red with data from file
+			fillArray(ROW,COL,blue,reader);
+			fillArray(ROW,COL,red,reader);
+
+
+		}catch(Exception e){};
+
+	}//end processFile()
+
+	/**
+	*fillArray() fills an array with values from a file using a Scanner.
+	*@param - int row - Number of Rows to fill
+	*@param - int col - Number of Columns to fill
+	*@param - int[][] array - The double integer array to fill
+	*@param - Scanner rdr - used to read in data from file
+	*@VOID RETURN
+	*/
+	public  void fillArray(int row,int col,int[][] array,Scanner rdr){
+		for(int i=0; i<row; i++){
+			for(int j=0; j<col; j++){
+				array[i][j] = rdr.nextInt();
+			}
+		}
+
+
+	}//end fillArray()
+
+
+	/**		createArrays(int rows, int cols)
+	@param int row - number of rows; found in text file
+	@param int col - number of cols; found in text file
+	*This method is a helper method to processFile. After ROW and COL
+	*are read, three arrays are created and filled with 0's with 
+	*appropriate number of rows and columns
+	*/
+	 private void createArrays(int rows, int cols){
+		blue = new int[rows][cols];
+		red = new int[rows][cols];
+		purple = new int[rows][cols];
+	}//end createArrays()
+	
+	
+	///-------------END FILE IO METHODS---------------------------------------
+	
+	
+	//HELPER METHODS 
+	private void writeToOuputTerminal(String message){
+		output.append(message+"\n");
+		output.setCaretPosition(output.getDocument().getLength());
+	}
+	
 
 	/**-----------BUTTON ACTION METHODS----------------------------*/
 	/**
@@ -114,9 +257,30 @@ public class Client extends JFrame{
 		System.out.println("Submit Button Pressed");
 		String input = userInputField.getText();
 		System.out.println(input);
-		output.append("Opening: "+ input);
+		writeToOuputTerminal("Opening: "+ input);
 		//TODO: Validate user input
-		output.append("\nFile Processed\n");
+				//File Handling ->ADAPTED FROM PREVIOUS LAB
+		System.out.println("File Handling Start");
+		File inputFile = checkFile(input);
+		if(inputFile == null)
+			return;
+		else
+			processFile(inputFile);
+
+		System.out.println("File Handling End");
+
+		System.out.printf("ROW: %d\nCOL: %d\n",ROW, COL);
+		System.out.println("Printing array: blue");
+		print2dArray(blue);
+		print2dArrayToTextArea(blue,displayArea1);
+
+		System.out.println("\nPrinting array: red");
+		print2dArray(red);
+		print2dArrayToTextArea(red,displayArea2);
+		
+		
+		//END
+		writeToOuputTerminal("\nFile Processed");
 		submitBtn.setVisible(false);
 		addBtn.setVisible(true);
 		userInputField.setEditable(false);
@@ -137,6 +301,10 @@ public class Client extends JFrame{
 		submitBtn.setEnabled(false);
 		addBtn.setVisible(false);
 		userInputField.setEditable(true);
+		fileNotFoundLbl.setVisible(false);
+		//reset matrix panels
+		displayArea1.setText("");
+		displayArea2.setText("");
 		
 	}
 
@@ -146,7 +314,7 @@ public class Client extends JFrame{
 	*/
 	private void sendPacket(){
 		System.out.println("Add Button Pressed");
-		output.append("Sending Matrices to Server.\nAwaiting Response...\n");
+		writeToOuputTerminal("Sending Matrices to Server.\nAwaiting Response...");
 		//TODO:disable reset button and add button until server responds
 	}
 
@@ -282,16 +450,27 @@ public class Client extends JFrame{
 		userInputField = new JTextField(".txt",25);
 		userInputField.addKeyListener(new KeyListener(){
 				public void keyTyped(KeyEvent e){
-					if(userInputField.getText().length() > 4)
+					if(userInputField.getText().length() > 3)
 						submitBtn.setEnabled(true);
 					else
 						submitBtn.setEnabled(false);
 				}
-				public void keyReleased(KeyEvent e){}
+				public void keyReleased(KeyEvent e){
+						if(e.getKeyCode() == 8||e.getKeyCode() == 127){
+						//System.out.println("DELETEING");
+						//System.out.println(userInputField.getText().length());
+						if(userInputField.getText().length() < 5)
+							submitBtn.setEnabled(false);
+						else
+							submitBtn.setEnabled(true);
+					} // backspace/delete
+				}
 				public void keyPressed(KeyEvent e){
 					if(e.getKeyCode() == KeyEvent.VK_ENTER){
 						processUserInput();
 					}
+
+					
 				}
 			}
 		);
@@ -304,6 +483,9 @@ public class Client extends JFrame{
 					int c = userInputField.getText().length();
 					if(userInputField.getCaretPosition() > (c-4))
 						userInputField.setCaretPosition(c-4);
+					//reset file not found if file was not found 
+					if(fileNotFoundLbl.isVisible())
+						fileNotFoundLbl.setVisible(false);
 
 				}
 				public void mouseEntered(MouseEvent e){}
@@ -331,7 +513,7 @@ public class Client extends JFrame{
 								JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 								JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		JScrollBar vSBar = outputPanel.getVerticalScrollBar();
-
+		
 		outputPanel.setBorder(BorderFactory.createTitledBorder(
 			null,
 			"Terminal Output",
