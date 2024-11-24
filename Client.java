@@ -27,6 +27,13 @@ import javax.swing.JScrollBar;
 
 import java.awt.Font;
 
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
+
 public class Client extends JFrame{
 
 
@@ -74,6 +81,37 @@ public class Client extends JFrame{
 
 
 		submitBtn = new JButton("SUBMIT");
+		submitBtn.addActionListener(
+			new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					//display the input in terminal & GUI
+					System.out.println("Submit Button Pressed");
+					String input = userInputField.getText();
+					System.out.println(input);
+					output.append("Opening: "+ input);
+					output.append("\nFile Processed\n");
+					//submitBtn.setVisible(false);
+					//addBtn.setVisible(true);
+
+				}
+			}
+		);
+		userInputField = new JTextField(" .txt",25);
+		userInputField.addKeyListener(new KeyListener(){
+				public void keyTyped(KeyEvent e){}
+				public void keyReleased(KeyEvent e){}
+				public void keyPressed(KeyEvent e){
+					if(e.getKeyCode() == KeyEvent.VK_ENTER){
+						//TODO: put into method
+						System.out.println("Submit Button Pressed");
+						String input = userInputField.getText();
+						System.out.println(input);
+						output.append("Opening: "+ input);
+						output.append("\nFile Processed\n");
+					}
+				}
+			}
+		);
 
 		addBtn = new JButton("ADD");
 
@@ -112,7 +150,23 @@ public class Client extends JFrame{
 		displayPanel3.setPreferredSize(new Dimension(width/3,height/4));
 		displayPanel3.setBackground(Color.green);
 
-		userInputField = new JTextField(" .txt",25);
+		//userInputField = new JTextField(" .txt",25);
+		userInputField.addMouseListener(
+			new MouseListener(){
+				public void mouseClicked(MouseEvent e){
+					//set cursor in front of .txt
+					//client can only "submit" .txt files
+					int c = userInputField.getText().length();
+					if(userInputField.getCaretPosition() > (c-4))
+						userInputField.setCaretPosition(c-4);
+
+				}
+				public void mouseEntered(MouseEvent e){}
+				public void mouseExited(MouseEvent e){}
+				public void mouseReleased(MouseEvent e){}
+				public void mousePressed(MouseEvent e){}
+			}
+		);
 		displayArea1 = new JTextArea(dummyData);
 		displayArea1.setFont(new Font("Bookman Old Style", Font.BOLD,19));
 		displayArea2 = new JTextArea(dummyData);
