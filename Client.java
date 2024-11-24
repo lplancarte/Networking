@@ -34,6 +34,17 @@ import java.awt.event.MouseEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
 
+import javax.swing.border.TitledBorder;
+
+/*
+https://www.geeksforgeeks.org/java-swing-jmenubar/
+*/
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.UIManager;
+
+
 public class Client extends JFrame{
 
 
@@ -59,21 +70,35 @@ public class Client extends JFrame{
 	private JTextArea output;
 	private JScrollPane outputPanel; //terminal Output
 
+	private JMenuBar menuBar;
+	private JMenu menu;
+	private JMenuItem m1;
+
 	private File file;
 	private Scanner inputScanner;
 
-	/*private String dummyData =  "_,_,_,_,_,_,_,_\n"+
-								"_,_,_,_,_,_,_,_\n"+
-								"_,_,_,_,_,_,_,_\n"+
-								"_,_,_,_,_,_,_,_\n"+
-								"_,_,_,_,_,_,_,_\n"+
-								"_,_,_,_,_,_,_,_\n"+
-								"_,_,_,_,_,_,_,_";*/
-	private String dummyData = "";
+	private String dummyData ="_,_,_,_,_,_,_\n"+
+								"_,_,_,_,_,_,_\n"+
+								"_,_,_,_,_,_,_\n"+
+								"_,_,_,_,_,_,_\n"+
+								"_,_,_,_,_,_,_\n"+
+								"_,_,_,_,_,_,_\n"+
+								"_,_,_,_,_,_,_";
+	//private String dummyData = "";
 
 	//GUI
 	public Client(){
 		super("Client: Matrix Addition");
+
+		menuBar = new JMenuBar();
+		menu = new JMenu("File");
+		m1 = new JMenuItem("About",
+			UIManager.getDefaults().getIcon("OptionPane.informationIcon")
+		);
+		menu.add(m1);
+		menuBar.add(menu);
+		super.setJMenuBar(menuBar);
+
 		int height = 800;
 		int width = 600;
 		Dimension frameD = new Dimension(width,height);
@@ -104,7 +129,12 @@ public class Client extends JFrame{
 
 		userInputField = new JTextField(" .txt",25);
 		userInputField.addKeyListener(new KeyListener(){
-				public void keyTyped(KeyEvent e){}
+				public void keyTyped(KeyEvent e){
+					if(userInputField.getText().length() > 4)
+						submitBtn.setEnabled(true);
+					else
+						submitBtn.setEnabled(false);
+				}
 				public void keyReleased(KeyEvent e){}
 				public void keyPressed(KeyEvent e){
 					if(e.getKeyCode() == KeyEvent.VK_ENTER){
@@ -115,6 +145,13 @@ public class Client extends JFrame{
 		);
 
 		addBtn = new JButton("ADD");
+		addBtn.addActionListener(
+			new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					sendPacket();
+				}
+			}
+		);
 
 		output = new JTextArea("Matrix Addition Client Interface\n"+
 								"Version 1.0.0\n"+
@@ -129,8 +166,15 @@ public class Client extends JFrame{
 								JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		JScrollBar vSBar = outputPanel.getVerticalScrollBar();
 
-		outputPanel.setBorder(BorderFactory.createTitledBorder("Terminal"+
-														"Output"));
+		outputPanel.setBorder(BorderFactory.createTitledBorder(
+			null,
+			"Terminal Output",
+			TitledBorder.CENTER,
+			0,
+			new Font("",Font.BOLD,18),
+			Color.black
+		));
+		output.setEditable(false);
 
 		fileInputLabel = new JLabel("Enter File Name: ");
 		fileNotFoundLbl = new JLabel("File Not Found");
@@ -141,15 +185,15 @@ public class Client extends JFrame{
 		
 		displayPanel1 = new JPanel();
 		displayPanel1.setPreferredSize(new Dimension(width/3,height/4));
-		displayPanel1.setBackground(Color.lightGray);
+		displayPanel1.setBackground(Color.gray);
 
 		displayPanel2 = new JPanel();
 		displayPanel2.setPreferredSize(new Dimension(width/3,height/4));
-		displayPanel2.setBackground(Color.cyan);
+		displayPanel2.setBackground(Color.gray);
 
 		displayPanel3 = new JPanel();
 		displayPanel3.setPreferredSize(new Dimension(width/3,height/4));
-		displayPanel3.setBackground(Color.green);
+		displayPanel3.setBackground(Color.darkGray);
 
 		//userInputField = new JTextField(" .txt",25);
 		userInputField.addMouseListener(
@@ -168,30 +212,112 @@ public class Client extends JFrame{
 				public void mousePressed(MouseEvent e){}
 			}
 		);
+
+		submitBtn.addMouseListener(
+			new MouseListener(){
+				public void mouseClicked(MouseEvent e){}
+				public void mouseEntered(MouseEvent e){
+					if(!userInputField.getText().equals(".txt")){
+						submitBtn.setBackground(Color.green);
+						submitBtn.setEnabled(true);
+					}
+				}
+				public void mouseExited(MouseEvent e){
+					submitBtn.setBackground(new JButton().getBackground());
+				}
+				public void mouseReleased(MouseEvent e){}
+				public void mousePressed(MouseEvent e){}
+			}
+		);
+
+		resetBtn.addMouseListener(
+			new MouseListener(){
+				public void mouseClicked(MouseEvent e){}
+				public void mouseEntered(MouseEvent e){
+					resetBtn.setBackground(Color.cyan);
+				}
+				public void mouseExited(MouseEvent e){
+					resetBtn.setBackground(new JButton().getBackground());
+				}
+				public void mouseReleased(MouseEvent e){}
+				public void mousePressed(MouseEvent e){}
+			}
+		);
+
+		addBtn.addMouseListener(
+			new MouseListener(){
+				public void mouseClicked(MouseEvent e){}
+				public void mouseEntered(MouseEvent e){
+					addBtn.setBackground(Color.green);
+				}
+				public void mouseExited(MouseEvent e){
+					addBtn.setBackground(new JButton().getBackground());
+				}
+				public void mouseReleased(MouseEvent e){}
+				public void mousePressed(MouseEvent e){}
+			}
+		);
+
+
 		displayArea1 = new JTextArea(dummyData);
-		displayArea1.setFont(new Font("Bookman Old Style", Font.BOLD,19));
+		displayArea1.setEditable(false);
+		displayArea1.setFont(new Font("", Font.BOLD,19));
+		displayArea1.setBackground(Color.black);
+		displayArea1.setForeground(Color.green);
+
 		displayArea2 = new JTextArea(dummyData);
-		displayArea2.setFont(new Font("Algerian", Font.BOLD,19));
+		displayArea2.setEditable(false);
+		displayArea2.setFont(new Font("", Font.BOLD,19));
+		displayArea2.setBackground(Color.black);
+		displayArea2.setForeground(Color.green);
+
 		displayArea3 = new JTextArea(dummyData);
-		displayArea3.setFont(new Font("Broadway", Font.BOLD,19));
+		displayArea3.setEditable(false);
+		displayArea3.setFont(new Font("", Font.BOLD,19));
+		displayArea3.setBackground(Color.black);
+		displayArea3.setForeground(Color.green);
 
 		textPanel.add(fileInputLabel);
 		textPanel.add(userInputField);
 		textPanel.add(submitBtn);
 		addBtn.setVisible(false); //when file is good then visible
+		submitBtn.setEnabled(false);
+
+
 		textPanel.add(addBtn);
 		textPanel.add(resetBtn);
 		textPanel.add(fileNotFoundLbl,BorderLayout.PAGE_END);
 		fileNotFoundLbl.setVisible(false); //if file not found visible
 
 		displayPanel1.add(displayArea1);
-		displayPanel1.setBorder(BorderFactory.createTitledBorder("Matrix A"));
+		displayPanel1.setBorder(BorderFactory.createTitledBorder(
+			null,
+			"Matrix A",
+			0,
+			0,
+			new Font("",Font.ITALIC,19),
+			Color.white
+		));
 
 		displayPanel2.add(displayArea2);
-		displayPanel2.setBorder(BorderFactory.createTitledBorder("Matrix B"));
+		displayPanel2.setBorder(BorderFactory.createTitledBorder(
+			null,
+			"Matrix B",
+			0,
+			0,
+			new Font("",Font.ITALIC,19),
+			Color.white
+		));
 
 		displayPanel3.add(displayArea3);
-		displayPanel3.setBorder(BorderFactory.createTitledBorder("Matrix Sum"));
+		displayPanel3.setBorder(BorderFactory.createTitledBorder(
+			null,
+			"Matrix Sum",
+			TitledBorder.CENTER,
+			0,
+			new Font("",Font.BOLD,15),
+			Color.white
+		));
 
 
 		backgroundPanel.add(textPanel);
@@ -201,8 +327,9 @@ public class Client extends JFrame{
 		backgroundPanel.add(outputPanel);
 
 		add(backgroundPanel);
-		setSize(700,600);
+		setSize(700,560);
 		setVisible(true);
+		setResizable(false);
 
 	}
 
@@ -227,14 +354,24 @@ public class Client extends JFrame{
 	}//end processUserInput()
 
 
+	/**
+	*resetUserInput() resets GUI
+	*/
 	private void resetUserInput(){
 		System.out.println("Reset Button Pressed");
 		userInputField.setText(".txt");
 		submitBtn.setVisible(true);
+		submitBtn.setEnabled(false);
 		addBtn.setVisible(false);
 		userInputField.setEditable(true);
+		
 	}
 
+
+	private void sendPacket(){
+		System.out.println("Add Button Pressed");
+		output.append("Sending Matrices to Server.\nAwaiting Response...\n");
+	}
 
 
 }//end CLient Class
