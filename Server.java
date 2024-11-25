@@ -40,6 +40,11 @@ import javax.swing.UIManager; //Used for Informational Icon
 
 import java.util.Date;
 
+import java.io.EOFException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 /**
 
 */
@@ -54,7 +59,7 @@ public class Server extends JFrame{
 	private static int [][] purple = null;
 	private static int ROW = 0;
 	private static int COL = 0;
-	private static String inputFileDefault = "matrix1.txt";
+
 
 	//---------GUI Components---------------------
 	private JPanel backgroundPanel;
@@ -76,7 +81,10 @@ public class Server extends JFrame{
 	private JMenu menu;
 	private JMenuItem m1;
 //---------------------------------------------
-
+	private ObjectOutputStream outputStream;
+	private ObjectInputStream inputStream;
+	private ServerSocket server;
+	private Socket connection;
 
 
 	private String dummyData = "";
@@ -91,6 +99,95 @@ public class Server extends JFrame{
 
 
 
+	}
+	//START NETWORKING
+
+	
+	public void runServer(){
+		try{
+			server = new ServerSocket(12345,10);
+			while(true){
+				try{
+					waitForConnection();
+					getStreams();
+					processConnection();
+				}catch(EOFException e){
+					writeToOuputTerminal("Connection to Server Lost");
+				}finally{
+					closeConnection();
+				}
+			}
+		}catch(IOException e){
+			e.printStackTrace();
+			writeToOuputTerminal(e.toString());
+		}
+	}
+	
+	public void waitForConnection() throws IOException{
+		writeToOuputTerminal("Waiting for connection...");
+		connection = server.accept();
+		writeToOuputTerminal("Connection recieved from: "+
+							connection.getInetAddress().getHostName());
+	}
+	
+	public void getStreams() throws IOException{
+		outputStream = new ObjectOutputStream(connection.getOutputStream());
+		outputStream.flush();
+		inputStream = new ObjectInputStream(connection.getInputStream());
+		writeToOuputTerminal("Connection Established");
+	}
+	
+	public void processConnection() throws IOException{
+		
+		
+		do{
+			try{
+				//TODO: Write a INSERTMETHODNAMEHERE() 
+				
+				blue = (int[][])inputStream.readObject();
+				if(blue == null){
+					closeConnection();
+					break;
+				}
+				displayArea1.setText("");
+				print2dArrayToTextArea(blue,displayArea1);
+				writeToOuputTerminal("BLUE Transfer Successful");
+				
+				red = (int[][])inputStream.readObject();
+				displayArea2.setText("");
+				print2dArrayToTextArea(red,displayArea2);
+				writeToOuputTerminal("RED Transfer Successful");
+				//return sum of red and blue 
+				purple = new int[red.length][red[0].length];
+				writeToOuputTerminal(red.length+"x"+red[0].length+" Matrix Created");
+				
+				//sendData(purple);
+			}catch(ClassNotFoundException e){
+				writeToOuputTerminal("Unknown object type recieved");
+			}
+		}while(true);
+	}
+	
+	public void closeConnection(){
+		writeToOuputTerminal("Terminating Connection");
+		try{
+			outputStream.close();
+			inputStream.close();
+			connection.close();
+		}catch(IOException e){
+			e.printStackTrace();
+			writeToOuputTerminal(e.toString());
+		}
+	}
+	
+	public void sendData(int[][] matrix){
+		try{
+			outputStream.writeObject(matrix);
+			outputStream.flush();
+			writeToOuputTerminal("Matrix Sent");
+		}catch(IOException e){
+			writeToOuputTerminal("Error writing object");
+		}
 	}
 	
 	///--------------START FILE IO METHODS-------->FROM PREVIOUS LAB----------
@@ -119,50 +216,6 @@ public class Server extends JFrame{
 
 
 		
-	/** 	processFile(File inputFile)
-	@param inputFile -File to be processed; returned by checkFile()
-	*It is assumed that this file has both:
-	*A header line with two integers representing rows and columns
-	*Dual matrices one on top of the other (2xrow)xcol
-	*/
-	 private void processFile(File inputFile){
-
-		try{
-			Scanner reader = new Scanner(inputFile);
-
-			//Feedback implementation
-			ROW = reader.nextInt();
-			COL = reader.nextInt();
-
-			//Create Arrays red, blue, and purple,fill with 0's
-			createArrays(ROW,COL);
-			//Fill arrays blue and red with data from file
-			fillArray(ROW,COL,blue,reader);
-			fillArray(ROW,COL,red,reader);
-
-
-		}catch(Exception e){};
-
-	}//end processFile()
-
-	/**
-	*fillArray() fills an array with values from a file using a Scanner.
-	*@param - int row - Number of Rows to fill
-	*@param - int col - Number of Columns to fill
-	*@param - int[][] array - The double integer array to fill
-	*@param - Scanner rdr - used to read in data from file
-	*@VOID RETURN
-	*/
-	public  void fillArray(int row,int col,int[][] array,Scanner rdr){
-		for(int i=0; i<row; i++){
-			for(int j=0; j<col; j++){
-				array[i][j] = rdr.nextInt();
-			}
-		}
-
-
-	}//end fillArray()
-
 
 	/**		createArrays(int rows, int cols)
 	@param int row - number of rows; found in text file

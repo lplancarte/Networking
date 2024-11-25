@@ -47,6 +47,11 @@ import javax.swing.UIManager; //Used for Informational Icon
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import java.net.InetAddress;
+import java.net.Socket;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.EOFException;
 
 
 /**
@@ -56,6 +61,8 @@ public class Client extends JFrame{
 
 	private static final int HEIGHT = 800;
 	private static final int WIDTH = 600;
+	private final String clientIP = "127.0.0.1";
+	private final int port = 12345;
 	
 	//FILE IO -> Brought in from Previous Lab 
 	private static int [][] blue = null;
@@ -93,6 +100,10 @@ public class Client extends JFrame{
 	private JMenuItem m1;
 //---------------------------------------------
 
+	//NETWORKING
+	private ObjectOutputStream outputStream;
+	private ObjectInputStream inputStream;
+	private Socket client;
 
 
 	private String dummyData = "";
@@ -108,7 +119,67 @@ public class Client extends JFrame{
 
 
 	}
+	//START NETWORKING METHODS 
+	public void runClient(){
+		try{
+			connectToServer();
+			processConnection();
+		}catch(EOFException e){
+			System.out.println("\nClient Has Terminated Connection");
+		}catch(IOException e){
+			e.printStackTrace();
+			writeToOuputTerminal(e.toString());
+		}finally{
+			closeConnection();
+		}
+	}
 	
+	public void connectToServer() throws IOException{
+		writeToOuputTerminal("Attempting to connect...");
+		client = new Socket(InetAddress.getByName(clientIP),port);
+		writeToOuputTerminal("Connected to: "+ client.getInetAddress().getHostName());
+	
+		outputStream = new ObjectOutputStream(client.getOutputStream());
+		outputStream.flush(); //always flush
+		inputStream = new ObjectInputStream(client.getInputStream());
+		writeToOuputTerminal("Connection Established");
+	}
+	
+	public void processConnection() throws IOException{
+		do{
+			try{
+				
+				purple = (int[][])inputStream.readObject();
+				writeToOuputTerminal("Matrix Returned from Server");
+				print2dArrayToTextArea(purple,displayArea3);
+			}catch(ClassNotFoundException e){
+				writeToOuputTerminal("Unknown object recieved");
+			}
+	
+		}while(!userInputField.getText().equals("TERMINATE.txt"));
+	}
+	
+	public void closeConnection(){
+		writeToOuputTerminal("Terminating Connection");
+		try{
+			outputStream.close();
+			inputStream.close();
+			client.close();
+		}catch(IOException e){
+			e.printStackTrace();
+			writeToOuputTerminal(e.toString());
+		}
+	}
+	
+	public void sendData(int[][] matrix){
+		try{
+			outputStream.writeObject(matrix);
+			outputStream.flush();
+			writeToOuputTerminal("Matrix Sent");
+		}catch(IOException e){
+			writeToOuputTerminal("Error Sending Packet");
+		}
+	}
 	///--------------START FILE IO METHODS-------->FROM PREVIOUS LAB----------
 	public  void print2dArray(int[][] matrix){
 		//print array given
@@ -257,6 +328,10 @@ public class Client extends JFrame{
 		System.out.println("Submit Button Pressed");
 		String input = userInputField.getText();
 		System.out.println(input);
+		if(input.equals("TERMINATE.txt")){
+			sendData(null);
+			return;
+		}
 		writeToOuputTerminal("Opening: "+ input);
 		//TODO: Validate user input
 				//File Handling ->ADAPTED FROM PREVIOUS LAB
@@ -284,7 +359,7 @@ public class Client extends JFrame{
 		submitBtn.setVisible(false);
 		addBtn.setVisible(true);
 		userInputField.setEditable(false);
-
+		
 	}//end processUserInput()
 
 
@@ -305,6 +380,7 @@ public class Client extends JFrame{
 		//reset matrix panels
 		displayArea1.setText("");
 		displayArea2.setText("");
+		displayArea3.setText("");
 		
 	}
 
@@ -314,8 +390,12 @@ public class Client extends JFrame{
 	*/
 	private void sendPacket(){
 		System.out.println("Add Button Pressed");
-		writeToOuputTerminal("Sending Matrices to Server.\nAwaiting Response...");
+		writeToOuputTerminal("Sending Matrices to Server.");
 		//TODO:disable reset button and add button until server responds
+		displayArea3.setText("");
+		sendData(blue);
+		sendData(red);
+		writeToOuputTerminal("\nAwaiting Response...");
 	}
 
 	/**------------START GUI COMPONENTS METHODS------------------------------*/ 

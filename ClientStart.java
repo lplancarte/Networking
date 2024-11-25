@@ -8,7 +8,8 @@ public class ClientStart{
 
 	public static void main(String[] args){
 		Client app = new Client();
-		app.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		app.runClient();
+		app.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 	}
 }
