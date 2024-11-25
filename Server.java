@@ -147,6 +147,8 @@ public class Server extends JFrame{
 				blue = (int[][])inputStream.readObject();
 				if(blue == null){
 					closeConnection();
+					displayArea1.setText("");
+					displayArea2.setText("");
 					break;
 				}
 				displayArea1.setText("");
