@@ -173,18 +173,27 @@ public class Server extends JFrame{
 				print2dArrayToTextArea(blue,displayArea1);
 				writeToOuputTerminal("BLUE Transfer Successful");
 				
+				//system output
+				System.out.println("MATRIX BLUE Transfer Successful");
+				print2dArray(blue);
+				
 				//Red Matrix; read in red array, reset display area, print new array to display area, inform user
 				red = (int[][])inputStream.readObject();
 				displayArea2.setText("");
 				print2dArrayToTextArea(red,displayArea2);
 				writeToOuputTerminal("RED Transfer Successful");
 				
+				//system output
+				System.out.println("MATRIX RED Transfer Successful");
+				print2dArray(red);
+				
 				//Start return sum of red and blue => Purple Matrix  
 				purple = new int[red.length][red[0].length];
 				writeToOuputTerminal(red.length+"x"+red[0].length+" Matrix Created");
+				System.out.println(" MATRIX PURPLE ["+red.length+"x"+red[0].length+"] created.");
 				
 				//Instantiate 4 ThreadOperation objects
-				System.out.println("Creating 4 ThreadOperation Objects");
+				System.out.println("Setting (4) ThreadOperation Objects");
 				upperRight = new ThreadOperation
 											(blue,red,purple,Quadrant.I);
 				upperLeft = new ThreadOperation
@@ -194,11 +203,13 @@ public class Server extends JFrame{
 				lowerLeft = new ThreadOperation
 											(blue,red,purple,Quadrant.IV);
 				//Start them
+				System.out.println("Starting Threads");
 				upperRight.start();
 				upperLeft.start();
 				lowerRight.start();
 				lowerLeft.start();
 				//Join them
+				System.out.println("Joining Threads");
 				try{
 					upperRight.join();
 					upperLeft.join();
@@ -209,11 +220,16 @@ public class Server extends JFrame{
 					System.out.println("INTERRUPTION HAS OCCURED");
 					writeToOuputTerminal("ADDITION Failed.");
 				};
+				System.out.println("Thread Operations Successful.");
+				System.out.println("MATRIX RED ADDED TO BLUE");
+				print2dArray(purple);
+				System.out.println("Sending Result Matrix PURPLE to Client");
 				//Purple Matrix ; send to client 
 				writeToOuputTerminal("Matrix ADDED Successfully!");
 				displayArea3.setText("");
 				print2dArrayToTextArea(purple,displayArea3);
 				sendData(purple);//end Send data purple 
+				System.out.println("Matrix sent successfully.");
 			}catch(ClassNotFoundException e){
 				writeToOuputTerminal("Unknown object type recieved");
 			}
@@ -438,6 +454,7 @@ public class Server extends JFrame{
 					);
 					if(userOpt == JOptionPane.OK_OPTION){
 						closeConnection();
+						System.out.println("Exiting.");
 						System.exit(1);
 					}
 
