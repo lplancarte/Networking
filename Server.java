@@ -155,8 +155,7 @@ public class Server extends JFrame{
 		
 		do{
 			try{
-				//TODO: Write a INSERTMETHODNAMEHERE() 
-				
+
 				//Read in blue array
 				blue = (int[][])inputStream.readObject();
 				
@@ -169,23 +168,12 @@ public class Server extends JFrame{
 				}
 				
 				//Blue Matrix; reset display area, print new array to display area, inform user 
-				displayArea1.setText("");
-				print2dArrayToTextArea(blue,displayArea1);
-				writeToOuputTerminal("BLUE Transfer Successful");
-				
-				//system output
-				System.out.println("MATRIX BLUE Transfer Successful");
-				print2dArray(blue);
-				
+				successMessageAnnounce(1, blue, displayArea1, "BLUE");
+
 				//Red Matrix; read in red array, reset display area, print new array to display area, inform user
 				red = (int[][])inputStream.readObject();
-				displayArea2.setText("");
-				print2dArrayToTextArea(red,displayArea2);
-				writeToOuputTerminal("RED Transfer Successful");
-				
-				//system output
-				System.out.println("MATRIX RED Transfer Successful");
-				print2dArray(red);
+				successMessageAnnounce(2,red, displayArea2, "RED");
+
 				
 				//Start return sum of red and blue => Purple Matrix  
 				purple = new int[red.length][red[0].length];
@@ -220,16 +208,9 @@ public class Server extends JFrame{
 					System.out.println("INTERRUPTION HAS OCCURED");
 					writeToOuputTerminal("ADDITION Failed.");
 				};
-				System.out.println("Thread Operations Successful.");
-				System.out.println("MATRIX RED ADDED TO BLUE");
-				print2dArray(purple);
-				System.out.println("Sending Result Matrix PURPLE to Client");
-				//Purple Matrix ; send to client 
-				writeToOuputTerminal("Matrix ADDED Successfully!");
-				displayArea3.setText("");
-				print2dArrayToTextArea(purple,displayArea3);
-				sendData(purple);//end Send data purple 
-				System.out.println("Matrix sent successfully.");
+				//PURPLE Sent Success 
+				successMessageAnnounce(3,purple,displayArea3,"PURPLE");
+
 			}catch(ClassNotFoundException e){
 				writeToOuputTerminal("Unknown object type recieved");
 			}
@@ -258,7 +239,7 @@ public class Server extends JFrame{
 		}
 	}
 	
-	///--------------START FILE IO METHODS-------->FROM PREVIOUS LAB----------
+	///--------------PRINT METHODS GUI & TERMINAL------------/
 	public  void print2dArray(int[][] matrix){
 		//print array given
 		for(int i = 0; i < matrix.length; i++){
@@ -281,96 +262,73 @@ public class Server extends JFrame{
 		}
 	}//end print2dArray
 
-
-
 		
-
-	/**		createArrays(int rows, int cols)
-	@param int row - number of rows; found in text file
-	@param int col - number of cols; found in text file
-	*This method is a helper method to processFile. After ROW and COL
-	*are read, three arrays are created and filled with 0's with 
-	*appropriate number of rows and columns
-	*/
-	 private void createArrays(int rows, int cols){
-		blue = new int[rows][cols];
-		red = new int[rows][cols];
-		purple = new int[rows][cols];
-	}//end createArrays()
-	
-	
-	///-------------END FILE IO METHODS---------------------------------------
-	
-	
 	//HELPER METHODS 
 	private void writeToOuputTerminal(String message){
 		output.append(message+"\n");
 		output.setCaretPosition(output.getDocument().getLength());
-	}
+	}//end writeToOuputTerminal
 	
 
-	/**-----------BUTTON ACTION METHODS----------------------------*/
 	/**
-	*processUserInput() processess user input to some degree
-	for now it will print to terminal and gui, switch buttons around.
-	Used in ActionEventListener and KeyEventListener for submitBtn and
-	userInputField respectivley.
+	*successMessageAnnounce takes in a displayArea number that correspoands to a matrix
+	it will then print out success messages to both gui and terminal.
+	@param int displayArea represents the display on the gui 
 	*/
-	private void processUserInput(){
-		System.out.println("Submit Button Pressed");
-		String input = "";
-		System.out.println(input);
-		writeToOuputTerminal("Opening: "+ input);
-		//TODO: Validate user input
-
-		System.out.printf("ROW: %d\nCOL: %d\n",ROW, COL);
-		System.out.println("Printing array: blue");
-		print2dArray(blue);
-		print2dArrayToTextArea(blue,displayArea1);
-
-		System.out.println("\nPrinting array: red");
-		print2dArray(red);
-		print2dArrayToTextArea(red,displayArea2);
+	private void successMessageAnnounce(int displayArea, int[][] matrix,
+									JTextArea display, String matrixName){
+		resetMatrixDisplays(displayArea);
 		
+		//GUI terminal output
+		print2dArrayToTextArea(matrix, display);
+		writeToOuputTerminal(matrixName+ " Transfer Successful");
+				
+		//System output
+		System.out.println("MATRIX "+matrixName+ " Transfer Successful");
+		print2dArray(matrix);
 		
-		//END
-		writeToOuputTerminal("\nFile Processed");
-		
-
-	}//end processUserInput()
-
+		//success in sending matrix back to client 
+		if(displayArea == 3){
+			System.out.println("Thread Operations Successful.");
+			System.out.println("MATRIX RED ADDED TO BLUE");
+			print2dArray(matrix);
+			System.out.println("Sending Result Matrix "+ matrixName+" to Client");
+			//Purple Matrix ; send to client 
+			writeToOuputTerminal("Matrix ADDED Successfully!");
+			displayArea3.setText("");
+			print2dArrayToTextArea(matrix,display);
+			sendData(matrix);//end Send data purple 
+			System.out.println("Matrix sent successfully.");
+		}
+	}
 
 	/**
-	*resetUserInput() resets GUI by 
-		*making the submit button visible
-		*disabling the submit button: until input is detected in textfield
-		*userInputField is set to editable and ".txt" added
+	*resetMatrixDisplays() will reset textareadisplays 1, 2, 3 or all
+	@Param int displayArea - # of the display to clear; 1, 2, 3, default: all
 	*/
-	private void resetMatrixDisplays(){
+	private void resetMatrixDisplays(int displayArea){
 	//private void resetUserInput(){
-		System.out.println("Matrix Reset");
-	
+		
+		switch(displayArea){
+			case 1: displayArea1.setText("");
+			break;
+			case 2: displayArea2.setText("");
+			break;
+			case 3: displayArea3.setText("");
+			break;
+			default:{
+				displayArea1.setText("");
+				displayArea2.setText("");
+				displayArea3.setText("");
+			}
+		}
 
-		//reset matrix panels
-		displayArea1.setText("");
-		displayArea2.setText("");
-		displayArea3.setText("");
+		System.out.println("Matrix Reset");
 
 		
 	}
 
-	/**
-	*sendPacket is used when add button is pressed, sends object to server
-		in TODO stage
-	*/
-	//sendData() does this 
-	private void sendPacket(){
-		System.out.println("Sending Matrix Result to Client");
-		writeToOuputTerminal("Sending Matrix Result to Client");
-		//System.out.println("Add Button Pressed");
-		writeToOuputTerminal("Sending Matrices to Server.\nAwaiting Response...");
-		//TODO:disable reset button and add button until server responds
-	}
+	/**------------END PRINT METHODS --------------------------------------*/
 
 	/**------------START GUI COMPONENTS METHODS------------------------------*/ 
 
