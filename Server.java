@@ -57,6 +57,7 @@ import java.net.Socket;
 */
 public class Server extends JFrame{
 
+	private static final int PORT = 12345;
 	private static final int HEIGHT = 800;
 	private static final int WIDTH = 600;
 	
@@ -118,7 +119,7 @@ public class Server extends JFrame{
 	
 	public void runServer(){
 		try{
-			server = new ServerSocket(12345,10);
+			server = new ServerSocket(PORT,10);
 			while(true){
 				try{
 					waitForConnection();
@@ -373,7 +374,10 @@ public class Server extends JFrame{
 					//show pop up message
 					JOptionPane.showMessageDialog(
 						outputPanel,
-						"About this App.\nLost of cool things\nOh Yeah!!",
+						"About this App.\n"+
+						"Adds matricies from a Client using threads\n"+
+						"Returns result to Client.\n"+
+						"Listening on Port: "+ PORT ,
 						"ABOUT",
 						JOptionPane.INFORMATION_MESSAGE
 					

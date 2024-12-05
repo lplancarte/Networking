@@ -538,7 +538,7 @@ public class Client extends JFrame{
 					//show pop up message
 					JOptionPane.showMessageDialog(
 						displayArea2,
-						"About this App.\nLost of cool things\nOh Yeah!!",
+						"About this App.\nAdd Matricies on a Server!\nOh Yeah!!",
 						"ABOUT",
 						JOptionPane.INFORMATION_MESSAGE
 					
@@ -554,7 +554,10 @@ public class Client extends JFrame{
 					//show pop up message
 					JOptionPane.showMessageDialog(
 						displayArea2,
-						"Help me App!\nThere is no help here...\nYet!",
+						"Help me App!\nEnter a valid text file in text field\n"+
+						"Press Submit Button or hit Enter Key to process text file.\n"+
+						"Press Add Button or hit Enter key to send matricies to Server.\n"+
+						"Press Reset Button to reset text field and/or erase matricies\n",
 						"HELP",
 						JOptionPane.QUESTION_MESSAGE
 					
