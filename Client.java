@@ -53,6 +53,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.EOFException;
 
+import javax.swing.JOptionPane;
 
 /**
 
@@ -98,6 +99,8 @@ public class Client extends JFrame{
 	private JMenuBar menuBar;
 	private JMenu menu;
 	private JMenuItem m1;
+	private JMenuItem m2;
+	private JMenuItem m3;
 //---------------------------------------------
 
 	//NETWORKING
@@ -196,7 +199,7 @@ public class Client extends JFrame{
 		//print array given
 		for(int i = 0; i < matrix.length; i++){
 			for(int j = 0; j < matrix[i].length; j++){
-				textArea.append(String.format("%2d",matrix[i][j]));
+				textArea.append(String.format("%3d",matrix[i][j]));
 			}
 			if(i < matrix.length -1)
 				textArea.append("\n");
@@ -503,7 +506,7 @@ public class Client extends JFrame{
 	}//end addButtons()
 	
 	//MENU
-	private void addMenu(){
+	/*private void addMenu(){
 		menuBar = new JMenuBar();
 		menu = new JMenu("File");
 		m1 = new JMenuItem("About",
@@ -512,7 +515,82 @@ public class Client extends JFrame{
 		menu.add(m1);
 		menuBar.add(menu);
 		super.setJMenuBar(menuBar);
+	}*/
+	
+	//MENU
+	private void addMenu(){
+		menuBar = new JMenuBar();
+		menu = new JMenu("File");
+		m1 = new JMenuItem("About",
+			UIManager.getDefaults().getIcon("OptionPane.informationIcon")
+		);
+		m2 = new JMenuItem("Help",
+			UIManager.getDefaults().getIcon("OptionPane.questionIcon")
+		);
+		m3 = new JMenuItem("Exit",
+			UIManager.getDefaults().getIcon("OptionPane.warningIcon")
+		);
+		
+		//Add menu item Action Listeners 
+		m1.addActionListener(
+			new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					//show pop up message
+					JOptionPane.showMessageDialog(
+						displayArea2,
+						"About this App.\nLost of cool things\nOh Yeah!!",
+						"ABOUT",
+						JOptionPane.INFORMATION_MESSAGE
+					
+					);
+
+				}
+			}
+		);
+		
+		m2.addActionListener(
+			new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					//show pop up message
+					JOptionPane.showMessageDialog(
+						displayArea2,
+						"Help me App!\nThere is no help here...\nYet!",
+						"HELP",
+						JOptionPane.QUESTION_MESSAGE
+					
+					);
+
+				}
+			}
+		);
+		
+		m3.addActionListener(
+			new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					//show pop up message
+					int userOpt = JOptionPane.showConfirmDialog(
+						displayArea2,
+						"To Exit.\nOr Not to Exit.\nThat is the Question.",
+						"EXIT",
+						JOptionPane.CANCEL_OPTION
+					
+					);
+					if(userOpt == JOptionPane.OK_OPTION){
+						System.out.println("Goodbye!");	
+						System.exit(1);
+					}
+
+				}
+			}
+		);		
+		
+		menu.add(m1);
+		menu.add(m2);
+		menu.add(m3);
+		menuBar.add(menu);
+		super.setJMenuBar(menuBar);
 	}
+
 
 	//TEXT PANEL
 	private void buildTextPanel(){
@@ -529,6 +607,7 @@ public class Client extends JFrame{
 	private void setUpUserInputField(){
 		userInputField = new JTextField(".txt",25);
 		userInputField.addKeyListener(new KeyListener(){
+				//once user types into textfield enable submit button
 				public void keyTyped(KeyEvent e){
 					if(userInputField.getText().length() > 3)
 						submitBtn.setEnabled(true);
@@ -544,12 +623,20 @@ public class Client extends JFrame{
 						else
 							submitBtn.setEnabled(true);
 					} // backspace/delete
+					
+
+					
 				}
 				public void keyPressed(KeyEvent e){
 					if(e.getKeyCode() == KeyEvent.VK_ENTER){
-						processUserInput();
+						//processUserInput();
+						if(submitBtn.isVisible()){
+							processUserInput();
+						}
+						else{
+							sendPacket();
+						}
 					}
-
 					
 				}
 			}

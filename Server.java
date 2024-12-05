@@ -2,6 +2,7 @@
 Programmer: Lucio Plancarte
 Created/Modified: 24-NOV-2024
 
+
 */
 
 import javax.swing.JFrame;
@@ -37,6 +38,10 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.UIManager; //Used for Informational Icon 
 
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.JOptionPane;
+
 
 import java.util.Date;
 
@@ -45,6 +50,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+
+
 /**
 
 */
@@ -80,6 +87,8 @@ public class Server extends JFrame{
 	private JMenuBar menuBar;
 	private JMenu menu;
 	private JMenuItem m1;
+	private JMenuItem m2;
+	private JMenuItem m3;
 //---------------------------------------------
 	private ObjectOutputStream outputStream;
 	private ObjectInputStream inputStream;
@@ -89,8 +98,12 @@ public class Server extends JFrame{
 
 	private String dummyData = "";
 
+	private ThreadOperation upperRight;
+	private ThreadOperation upperLeft;
+	private ThreadOperation lowerRight;
+	private ThreadOperation lowerLeft;
 
-	public Server(){
+	public Server (){
 		//GUI
 		super("Server: Matrix Addition");	
 		buildGUI();
@@ -144,26 +157,63 @@ public class Server extends JFrame{
 			try{
 				//TODO: Write a INSERTMETHODNAMEHERE() 
 				
+				//Read in blue array
 				blue = (int[][])inputStream.readObject();
+				
+				//CLose connection if blue array is null
 				if(blue == null){
 					closeConnection();
 					displayArea1.setText("");
 					displayArea2.setText("");
 					break;
 				}
+				
+				//Blue Matrix; reset display area, print new array to display area, inform user 
 				displayArea1.setText("");
 				print2dArrayToTextArea(blue,displayArea1);
 				writeToOuputTerminal("BLUE Transfer Successful");
 				
+				//Red Matrix; read in red array, reset display area, print new array to display area, inform user
 				red = (int[][])inputStream.readObject();
 				displayArea2.setText("");
 				print2dArrayToTextArea(red,displayArea2);
 				writeToOuputTerminal("RED Transfer Successful");
-				//return sum of red and blue 
+				
+				//Start return sum of red and blue => Purple Matrix  
 				purple = new int[red.length][red[0].length];
 				writeToOuputTerminal(red.length+"x"+red[0].length+" Matrix Created");
 				
-				//sendData(purple);
+				//Instantiate 4 ThreadOperation objects
+				System.out.println("Creating 4 ThreadOperation Objects");
+				upperRight = new ThreadOperation
+											(blue,red,purple,Quadrant.I);
+				upperLeft = new ThreadOperation
+											(blue,red,purple,Quadrant.II);
+				lowerRight = new ThreadOperation
+											(blue,red,purple,Quadrant.III);
+				lowerLeft = new ThreadOperation
+											(blue,red,purple,Quadrant.IV);
+				//Start them
+				upperRight.start();
+				upperLeft.start();
+				lowerRight.start();
+				lowerLeft.start();
+				//Join them
+				try{
+					upperRight.join();
+					upperLeft.join();
+					lowerRight.join();
+					lowerLeft.join();
+
+				}catch(InterruptedException e){
+					System.out.println("INTERRUPTION HAS OCCURED");
+					writeToOuputTerminal("ADDITION Failed.");
+				};
+				//Purple Matrix ; send to client 
+				writeToOuputTerminal("Matrix ADDED Successfully!");
+				displayArea3.setText("");
+				print2dArrayToTextArea(purple,displayArea3);
+				sendData(purple);//end Send data purple 
 			}catch(ClassNotFoundException e){
 				writeToOuputTerminal("Unknown object type recieved");
 			}
@@ -208,9 +258,9 @@ public class Server extends JFrame{
 		//print array given
 		for(int i = 0; i < matrix.length; i++){
 			for(int j = 0; j < matrix[i].length; j++){
-				textArea.append(String.format("%2d",matrix[i][j]));
+				textArea.append(String.format("%3d",matrix[i][j]));	
 			}
-			if(i < matrix.length -1)
+			//if(i < matrix.length -1)
 				textArea.append("\n");
 		}
 	}//end print2dArray
@@ -280,13 +330,16 @@ public class Server extends JFrame{
 		*disabling the submit button: until input is detected in textfield
 		*userInputField is set to editable and ".txt" added
 	*/
-	private void resetUserInput(){
-		System.out.println("Reset Button Pressed");
+	private void resetMatrixDisplays(){
+	//private void resetUserInput(){
+		System.out.println("Matrix Reset");
 	
 
 		//reset matrix panels
 		displayArea1.setText("");
 		displayArea2.setText("");
+		displayArea3.setText("");
+
 		
 	}
 
@@ -294,8 +347,11 @@ public class Server extends JFrame{
 	*sendPacket is used when add button is pressed, sends object to server
 		in TODO stage
 	*/
+	//sendData() does this 
 	private void sendPacket(){
-		System.out.println("Add Button Pressed");
+		System.out.println("Sending Matrix Result to Client");
+		writeToOuputTerminal("Sending Matrix Result to Client");
+		//System.out.println("Add Button Pressed");
 		writeToOuputTerminal("Sending Matrices to Server.\nAwaiting Response...");
 		//TODO:disable reset button and add button until server responds
 	}
@@ -317,6 +373,10 @@ public class Server extends JFrame{
 	}
 	
 
+
+	
+	
+	
 	
 	//MENU
 	private void addMenu(){
@@ -325,7 +385,69 @@ public class Server extends JFrame{
 		m1 = new JMenuItem("About",
 			UIManager.getDefaults().getIcon("OptionPane.informationIcon")
 		);
+		m2 = new JMenuItem("Help",
+			UIManager.getDefaults().getIcon("OptionPane.questionIcon")
+		);
+		m3 = new JMenuItem("Exit",
+			UIManager.getDefaults().getIcon("OptionPane.warningIcon")
+		);
+		
+		//Add menu item Action Listeners 
+		m1.addActionListener(
+			new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					//show pop up message
+					JOptionPane.showMessageDialog(
+						outputPanel,
+						"About this App.\nLost of cool things\nOh Yeah!!",
+						"ABOUT",
+						JOptionPane.INFORMATION_MESSAGE
+					
+					);
+
+				}
+			}
+		);
+		
+		m2.addActionListener(
+			new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					//show pop up message
+					JOptionPane.showMessageDialog(
+						outputPanel,
+						"Help me App!\nThere is no help here...\nYet!",
+						"HELP",
+						JOptionPane.QUESTION_MESSAGE
+					
+					);
+
+				}
+			}
+		);
+		
+		m3.addActionListener(
+			new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					//show pop up message
+					int userOpt = JOptionPane.showConfirmDialog(
+						outputPanel,
+						"To Exit.\nOr Not to Exit.\nThat is the Question.",
+						"EXIT",
+						JOptionPane.CANCEL_OPTION
+					
+					);
+					if(userOpt == JOptionPane.OK_OPTION){
+						closeConnection();
+						System.exit(1);
+					}
+
+				}
+			}
+		);		
+		
 		menu.add(m1);
+		menu.add(m2);
+		menu.add(m3);
 		menuBar.add(menu);
 		super.setJMenuBar(menuBar);
 	}
@@ -383,6 +505,7 @@ public class Server extends JFrame{
 		displayArea3.setFont(new Font("", Font.BOLD,19));
 		displayArea3.setBackground(Color.black);
 		displayArea3.setForeground(Color.green);
+		
 	}
 	
 	private void addMatrixDisplaysToPanels(){
@@ -457,6 +580,8 @@ public class Server extends JFrame{
 		//ADD BACKGROUND PANEL TO JFRAME; set size,visibility, & restrict resize
 		add(backgroundPanel);
 		setSize(700,560);
+		//setSize(900,600);
+
 		
 		//ADD ABOUT MENU
 		addMenu();

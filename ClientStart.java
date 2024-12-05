@@ -9,6 +9,7 @@ public class ClientStart{
 	public static void main(String[] args){
 		Client app = new Client();
 		app.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		app.setLocationRelativeTo(null);
 		app.runClient();
 		
 
