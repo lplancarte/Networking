@@ -279,14 +279,6 @@ public class Server extends JFrame{
 									JTextArea display, String matrixName){
 		resetMatrixDisplays(displayArea);
 		
-		//GUI terminal output
-		print2dArrayToTextArea(matrix, display);
-		writeToOuputTerminal(matrixName+ " Transfer Successful");
-				
-		//System output
-		System.out.println("MATRIX "+matrixName+ " Transfer Successful");
-		print2dArray(matrix);
-		
 		//success in sending matrix back to client 
 		if(displayArea == 3){
 			System.out.println("Thread Operations Successful.");
@@ -299,6 +291,14 @@ public class Server extends JFrame{
 			print2dArrayToTextArea(matrix,display);
 			sendData(matrix);//end Send data purple 
 			System.out.println("Matrix sent successfully.");
+		}else{
+			//GUI terminal output
+			print2dArrayToTextArea(matrix, display);
+			writeToOuputTerminal(matrixName+ " Transfer Successful");
+				
+			//System output
+			System.out.println("MATRIX "+matrixName+ " Transfer Successful");
+			print2dArray(matrix);
 		}
 	}
 
