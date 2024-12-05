@@ -163,8 +163,9 @@ public class Server extends JFrame{
 				//CLose connection if blue array is null
 				if(blue == null){
 					closeConnection();
-					displayArea1.setText("");
-					displayArea2.setText("");
+					//displayArea1.setText("");
+					//displayArea2.setText("");
+					resetMatrixDisplays(4);
 					break;
 				}
 				
@@ -272,9 +273,11 @@ public class Server extends JFrame{
 	
 
 	/**
-	*successMessageAnnounce takes in a displayArea number that correspoands to a matrix
-	it will then print out success messages to both gui and terminal.
-	@param int displayArea represents the display on the gui 
+	*successMessageAnnounce prints to gui and terminal success Messages
+	@param int displayArea - used to in resetMatrtixDisplay() to reset display 
+	@param int[][] matrix to print in display 
+	@param  JTextArea display - JTextArea displayArea1,2,or 3
+	@param String matrixName - name of the Matrix Name to display in messages 
 	*/
 	private void successMessageAnnounce(int displayArea, int[][] matrix,
 									JTextArea display, String matrixName){
